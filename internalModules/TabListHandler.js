@@ -245,7 +245,33 @@ export class TabListHandler {
   addTeamOverride(uuid, username, data) {
     //not entirely sure why but this happens sometimes - just don't set in that case
     if (username === undefined) return
-    
+    let extraText
+    if (data.nicked) {
+      extraText = "§c [NICKED]"
+    } else {
+      let wins = data.wins
+      let winsColor
+      let colors = new Map([
+        [10000, "1"],
+        [5000, "0"],
+        [2500, "c"],
+        [1500, "6"],
+        [1000, "5"],
+        [500, "9"],
+        [250, "a"],
+        [100, "2"],
+        [50, "f"],
+        [15, "7"],
+        [0, "8"]
+      ])
+      for (let [key, value] of colors) {
+        if (wins >= key) {
+          winsColor = value
+          break
+        }
+      }
+      extraText = `§${winsColor} [${wins.toString()}]`
+    }
     let orderingNums
     let serverTeamValue = null
     for (let [key, value] of this.teams.entries()) {
@@ -260,37 +286,6 @@ export class TabListHandler {
       }
     }
     let newTeamKey = (orderingNums || "aaa") + username.substring(0, 3) + randomString(10)
-    let extraText
-    if (data.nicked) {
-      extraText = "§c [NICKED]"
-    } else {
-      let wins = data.wins
-      let winsColor
-      if (wins < 15) {
-        winsColor = "8"
-      } else if (wins < 50) {
-        winsColor = "7"
-      } else if (wins < 100) {
-        winsColor = "f"
-      } else if (wins < 250) {
-        winsColor = "2"
-      } else if (wins < 500) {
-        winsColor = "a"
-      } else if (wins < 1000) {
-        winsColor = "9"
-      } else if (wins < 1500) {
-        winsColor = "5"
-      } else if (wins < 2500) {
-        winsColor = "6"
-      } else if (wins < 5000) {
-        winsColor = "c"
-      } else if (wins < 10000) {
-        winsColor = "0"
-      } else {
-        winsColor = "1"
-      }
-      extraText = `§${winsColor} [${wins.toString()}]`
-    }
     let newSuffix
     if (serverTeamValue?.suffix) {
       newSuffix = serverTeamValue.suffix + extraText
