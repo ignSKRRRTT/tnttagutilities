@@ -308,9 +308,9 @@ export class TabListHandler {
       name: newTeamKey,
       prefix: newPrefix,
       suffix: newSuffix,
-      friendlyFire: 3,
-      nameTagVisibility: "always",
-      color: 15,
+      friendlyFire: (serverTeamValue?.friendlyFire === undefined ? 3 : serverTeamValue.friendlyFire),
+      nameTagVisibility: (serverTeamValue?.nameTagVisibility === undefined ? "always" : serverTeamValue.nameTagVisibility),
+      color: (serverTeamValue?.color === undefined ? 15 : serverTeamValue.color),
       players: [username]
     })
     this.teamOverrides.set(uuid, {
