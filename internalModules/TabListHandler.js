@@ -17,6 +17,9 @@ export class TabListHandler {
     this.players = new Map()
     this.teamOverrides = new Map()
 
+    this.entityVisibilityByEID = new Map()
+    this.entityVisibilityByUUID = new Map()
+
     if (enabled) {
       this.bindModifiers()
       this.bindEventListeners()
@@ -37,7 +40,7 @@ export class TabListHandler {
     this.proxyClient.on("player_info", data => {
       let action = data.action
       for (let playerInfo of data.data) {
-        if (this.userClient.protocolVersion < 761 && action === 4) {
+        if (action === 4) {
           this.players.delete(playerInfo.UUID) //always uppercase UUID for versions < 761
           if (this.teamOverrides.has(playerInfo.UUID)) {
             this.removeTeamOverride(playerInfo.UUID)
@@ -83,6 +86,37 @@ export class TabListHandler {
         for (let key of this.teamOverrides.keys()) {
           this.removeTeamOverride(key)
         }
+      }
+    })
+    this.proxyClient.on("named_entity_spawn", data => {
+      let obj = {
+        uuid: data.playerUUID,
+        invisible: false
+      }
+      this.entityVisibilityByEID.set(data.entityId, obj)
+      this.entityVisibilityByUUID.set(data.playerUUID, obj)
+    })
+    this.proxyClient.on("entity_destroy", data => {
+      for (let id of data.entityIds) {
+        let thing = this.entityVisibilityByEID.get(id)
+        if (thing) {
+          if (this.teamOverrides.has(thing.uuid)) this.replaceTeamOverride(thing.uuid)
+          this.entityVisibilityByEID.delete(id)
+          this.entityVisibilityByUUID.delete(thing.uuid)
+        }
+      }
+    })
+    this.proxyClient.on("entity_metadata", data => {
+      if (!this.entityVisibilityByEID.has(data.entityId)) return
+      let relevantThing = data.metadata.find(obj => obj.key === 0 && obj.type === 0)
+      if (!relevantThing) return
+      let obj = this.entityVisibilityByEID.get(data.entityId)
+      let newState = Boolean(relevantThing.value & 0x20)
+      let oldState = obj.invisible
+
+      if (newState !== oldState) {
+        obj.invisible = newState
+        if (this.teamOverrides.has(obj.uuid)) this.replaceTeamOverride(obj.uuid)
       }
     })
   }
@@ -309,7 +343,7 @@ export class TabListHandler {
       prefix: newPrefix,
       suffix: newSuffix,
       friendlyFire: (serverTeamValue?.friendlyFire === undefined ? 3 : serverTeamValue.friendlyFire),
-      nameTagVisibility: (serverTeamValue?.nameTagVisibility === undefined ? "always" : serverTeamValue.nameTagVisibility),
+      nameTagVisibility: (serverTeamValue?.nameTagVisibility === undefined ? (this.entityVisibilityByUUID.get(uuid)?.invisible ? "never" : "always") : serverTeamValue.nameTagVisibility),
       color: (serverTeamValue?.color === undefined ? 15 : serverTeamValue.color),
       players: [username]
     })
