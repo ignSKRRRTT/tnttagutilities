@@ -10,7 +10,7 @@ If you need support DM @skrrrtt on discord
 - Install [Node.js](https://nodejs.org/en/download/)
 - Download this repo to a folder on your computer (First click the green Code button near the top center, then click Download ZIP, and unzip the folder.)
 - Open Windows Powershell or a similar command prompt
-- Navigate to the folder using the `cd` command: for example `cd C:/users/Aiden/Desktop/`
+- Navigate to the folder using the `cd` command: for example `cd C:/users/Aiden/Desktop/tnttagutilities`
 - Run `npm install` to download this project's dependencies
 - Run `npm start` to start this
 - The proxy is now up and running, follow the above instructions to use it in Minecraft.
