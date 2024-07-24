@@ -5,7 +5,12 @@ If you need support DM @skrrrtt on discord
 
 *I commissioned someone to make this mod as I do not have a good understanding of minecraft protocol. I was given permission to open source it by the person who made it.*
 
-## How to run and use the mod
+## How to use the script from binary (executable)
+- Download and run the binary for your operating system from the [releases](https://github.com/ignSKRRRTT/tnttagutilities/releases) tab
+- You will be prompted to login with microsoft. Once logged in the proxy will redirect you to hypixel and you will be able to use the mod! If you are unsure as to why you need to login then read [this](https://github.com/ignSKRRRTT/tnttagutilities?tab=readme-ov-file#why-do-i-need-to-login)
+- To stop the program, type `exit` in the command prompt, or close the window.
+
+## How to run and use the script from source
 
 - Install [Node.js](https://nodejs.org/en/download/)
 - Download this repo to a folder on your computer (First click the green Code button near the top center, then click Download ZIP, and unzip the folder.)
@@ -13,7 +18,7 @@ If you need support DM @skrrrtt on discord
 - Navigate to the folder using the `cd` command: for example `cd C:/users/Aiden/Desktop/tnttagutilities`
 - Run `npm install` to download this project's dependencies
 - Run `npm start` to start this
-- The proxy is now up and running, follow the above instructions to use it in Minecraft.
+- You will be prompted to login with microsoft. Once logged in the proxy will redirect you to hypixel and you will be able to use the mod!
 - To stop the program, type `exit` in the command prompt, or close the window.
 
 **Most of these steps you will only have to do once. Further uses will just require you to cd to the app in powershell or CMD and run `npm start`**
