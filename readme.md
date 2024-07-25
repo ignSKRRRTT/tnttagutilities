@@ -27,11 +27,15 @@ If you need support DM @skrrrtt on discord
 - Displays player's wins on player list and name tags.
 - Displays a "NICKED" status next to a player's name if they are nicked
 - Displays explosion timer and alive players above hotbar where "Run away!" would usually be.
+- Displays explosion timer and alive players on bossbar. (can be moved with lunar client)
+  + *Bossbar is off by default and will have to be turned on in the config. Due to how bossbars work in 1.8 a hidden wither has to be spawned and flicking fast can make the wither particles show. If you turn off potion particles and smoke animation you will not see any wither particles.*
+- Boldens the speed and slowness message in chat to make it stand out more.
+- Plays a high pitch jukebox sound when you get speed 3 and a low pitch jukebox sound when you give slowness 1 to someone.
+- Plays an ender dragon hit sound when you throw someone back with the repulsor powerup.
+- Plays a counting down tick sound for the last 5 seconds of the round.
+- Makes the countdown number a decimal for more accuracy.
 - `/tstats <optional user>` shows you someone's TNT Tag stats, or your own.
 - `/blacklist add/remove <user>` adds user to a blacklist and gives them a yellow colored name on the player list and on their nametag so you can spot players you want to avoid.
-- Boldens the speed and slowness message in chat to make it stand out more.
-- Plays a jukebox sound when you get speed 3 and give slowness 1 to someone.
-- Plays a sound when you throw someone back with the repulsor powerup.
 
 ## Images
 <img src="https://r2.e-z.host/2082d908-7c65-4fc3-b02a-5f50f9141543/t1d707ze.png" />
