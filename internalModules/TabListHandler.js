@@ -69,7 +69,7 @@ export class TabListHandler {
           this.players.set(object.uuid, object)
         }
       }
-      if (this.stateHandler.state === "waiting") this.checkPlayerList()
+      if (this.stateHandler.state === "game") this.checkPlayerList()
     })
     this.proxyClient.on("player_remove", data => {
       for (let uuid of data.players) {
@@ -80,7 +80,7 @@ export class TabListHandler {
       }
     })
     this.stateHandler.on("state", state => {
-      if (state === "waiting") {
+      if (state === "game") {
         this.checkPlayerList()
       } else {
         for (let key of this.teamOverrides.keys()) {
@@ -246,7 +246,7 @@ export class TabListHandler {
       (async () => {
         let userData = await getStats(uuid)
         if (!userData) return
-        if (this.stateHandler.state !== "waiting") return
+        if (this.stateHandler.state !== "game") return
         if (!this.players.has(uuid)) return
         if (this.teamOverrides.has(uuid)) return
         let player = this.players.get(uuid)
@@ -263,7 +263,7 @@ export class TabListHandler {
   }
 
   nickedPlayer(uuid) {
-    if (this.stateHandler.state !== "waiting") return
+    if (this.stateHandler.state !== "game") return
     if (this.teamOverrides.has(uuid)) return
     let player = this.players.get(uuid)
     if (!player) return
