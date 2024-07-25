@@ -1,5 +1,4 @@
 import EventEmitter from "events"
-import { removeFormattingCodes } from "../utils/utils.js"
 
 export class StateHandler extends EventEmitter {
   constructor(clientHandler) {
@@ -17,10 +16,7 @@ export class StateHandler extends EventEmitter {
     this.locrawRetryCount = 0
     this.requestedLocraw = false
     
-    this.lastPosition = {x: 0, y: 0, z: 0}
-
-    this.playersAlive = 32
-    this.explosionTime = "§a54s"
+    this.currentPosition = {x: 0, y: 0, z: 0}
 
     this.bindEventListeners()
     this.bindModifiers()
@@ -28,7 +24,6 @@ export class StateHandler extends EventEmitter {
 
   bindModifiers() {
     this.clientHandler.incomingModifiers.push(this.handleIncomingPacketForChat.bind(this))
-    this.clientHandler.incomingModifiers.push(this.handleIncomingPacketForActionBar.bind(this))
   }
 
   handleIncomingPacketForChat(data, meta) {
@@ -81,7 +76,7 @@ export class StateHandler extends EventEmitter {
         this.lastServerLocraw = content.server
       }
       if (content.gametype === "TNTGAMES" && content.mode === "TNTAG") {
-        if (this.state === "none") this.setState("waiting")
+        if (this.state === "none") this.setState("game")
       }
       return {
         type: "cancel"
@@ -90,7 +85,7 @@ export class StateHandler extends EventEmitter {
     
     //slowness applied
     checks: {
-      if (this.state !== "waiting") break checks
+      if (this.state !== "game") break checks
       if (parsedMessage.extra?.length !== 5) break checks
       if (parsedMessage.extra[0].text !== "You got lucky and applied ") break checks
       if (parsedMessage.extra[0].color !== "yellow") break checks
@@ -98,9 +93,9 @@ export class StateHandler extends EventEmitter {
         soundName: "note.harp",
         volume: 1,
         pitch: 35,
-        x: Math.round(this.lastPosition.x * 8),
-        y: Math.round(this.lastPosition.y * 8) + 8, //a little above the head so it sounds centered despite these sounds only being playable at ints
-        z: Math.round(this.lastPosition.z * 8)
+        x: Math.round(this.currentPosition.x * 8),
+        y: Math.round(this.currentPosition.y * 8) + 8,
+        z: Math.round(this.currentPosition.z * 8)
       })
       parsedMessage.extra.forEach(m => {
         m.bold = true
@@ -114,7 +109,7 @@ export class StateHandler extends EventEmitter {
     }
     //speed received
     checks: {
-      if (this.state !== "waiting") break checks
+      if (this.state !== "game") break checks
       if (parsedMessage.extra?.length !== 3) break checks
       if (parsedMessage.extra[0].text !== "You got lucky and received ") break checks
       if (parsedMessage.extra[0].color !== "yellow") break checks
@@ -122,9 +117,9 @@ export class StateHandler extends EventEmitter {
         soundName: "note.harp",
         volume: 1,
         pitch: 74,
-        x: Math.round(this.lastPosition.x * 8),
-        y: Math.round(this.lastPosition.y * 8) + 8, //a little above the head so it sounds centered despite these sounds only being playable at ints
-        z: Math.round(this.lastPosition.z * 8)
+        x: Math.round(this.currentPosition.x * 8),
+        y: Math.round(this.currentPosition.y * 8) + 8,
+        z: Math.round(this.currentPosition.z * 8)
       })
       parsedMessage.extra.forEach(m => {
         m.bold = true
@@ -138,7 +133,7 @@ export class StateHandler extends EventEmitter {
     }
     //repulsed tnt holders
     checks: {
-      if (this.state !== "waiting") break checks
+      if (this.state !== "game") break checks
       if (parsedMessage.extra?.length !== 1) break checks
       if (parsedMessage.extra[0].text !== "You have repulsed nearby TNT holders!") break checks
       if (parsedMessage.extra[0].color !== "yellow") break checks
@@ -146,9 +141,9 @@ export class StateHandler extends EventEmitter {
         soundName: "mob.enderdragon.hit",
         volume: 5,
         pitch: 63,
-        x: Math.round(this.lastPosition.x * 8),
-        y: Math.round(this.lastPosition.y * 8) + 8, //a little above the head so it sounds centered despite these sounds only being playable at ints
-        z: Math.round(this.lastPosition.z * 8)
+        x: Math.round(this.currentPosition.x * 8),
+        y: Math.round(this.currentPosition.y * 8) + 8,
+        z: Math.round(this.currentPosition.z * 8)
       })
       parsedMessage.extra.forEach(m => {
         m.bold = true
@@ -159,20 +154,6 @@ export class StateHandler extends EventEmitter {
         meta,
         data
       }
-    }
-  }
-
-  handleIncomingPacketForActionBar(data, meta) {
-    let actualMessage
-    if (meta.name === "chat") {
-      if (data.position !== 2) return
-      actualMessage = data.message
-    } else if (meta.name === "system_chat") {
-      if (data.type !== 2 && !data.isActionBar) return
-      actualMessage = data.content
-    } else return
-    if (this.state === "waiting") return {
-      type: "cancel"
     }
   }
 
@@ -202,29 +183,33 @@ export class StateHandler extends EventEmitter {
         }, 150)
       }
     })
-    this.proxyClient.on("scoreboard_team", data => {
-      if (this.state !== "waiting") return
-      checks: {
-        if (data.prefix !== "§eExplosion in ") break checks
-        if (!data.suffix || data.suffix.length < 4) break checks
-        this.explosionTime = data.suffix
-        this.displayActionBar()
-      }
-      checks: {
-        if (!data.prefix) break checks
-        if (!data.prefix.startsWith("Alive: §a")) break checks
-        let thingy = data.prefix.substring(9)
-        thingy = thingy.substring(0, thingy.indexOf(" "))
-        thingy = parseInt(thingy)
-        this.playersAlive = thingy
-        this.displayActionBar()
-      }
-    })
     this.userClient.on("position", data => {
-      this.lastPosition = data
+      this.currentPosition = {
+        ...this.currentPosition,
+        ...data
+      }
+      this.emit("posUpdate")
     })
     this.userClient.on("position_look", data => {
-      this.lastPosition = data
+      this.currentPosition = {
+        ...this.currentPosition,
+        ...data
+      }
+      this.emit("posUpdate")
+    })
+    this.userClient.on("look", data => {
+      this.currentPosition = {
+        ...this.currentPosition,
+        ...data
+      }
+      this.emit("posUpdate")
+    })
+    this.userClient.on("flying", data => {
+      this.currentPosition = {
+        ...this.currentPosition,
+        ...data
+      }
+      this.emit("posUpdate")
     })
   }
 
@@ -233,15 +218,5 @@ export class StateHandler extends EventEmitter {
     this.state = state
     this.emit("state", state)
     this.emit(state)
-    if (state === "waiting") {
-      this.playersAlive = 32
-      this.explosionTime = "§a54s"
-    }
-  }
-
-  displayActionBar() {
-    this.clientHandler.sendClientActionBar({
-      text: `§eExplosion in ${this.explosionTime} §f| §a${this.playersAlive} §ePlayers Alive`
-    })
   }
 }

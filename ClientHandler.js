@@ -4,6 +4,7 @@ import { CustomCommands } from "./internalModules/CustomCommands.js"
 import { StateHandler } from "./internalModules/StateHandler.js"
 import { ConsoleLogger } from "./internalModules/ConsoleLogger.js"
 import { TabListHandler } from "./internalModules/TabListHandler.js"
+import { AccurateTimer } from "./internalModules/AccurateTimer.js"
 
 export class ClientHandler extends EventEmitter {
   constructor(userClient, proxy, id) {
@@ -34,6 +35,7 @@ export class ClientHandler extends EventEmitter {
     this.customCommands = new CustomCommands(this)
     this.consoleLogger = new ConsoleLogger(this)
     this.tabListHandler = new TabListHandler(this)
+    this.accurateTimer = new AccurateTimer(this)
 
     this.bindEventListeners()
   }
@@ -128,4 +130,3 @@ export class ClientHandler extends EventEmitter {
     })
   }
 }
-
